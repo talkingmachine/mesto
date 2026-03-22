@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
-import mongoose from 'mongoose';
+import mongoose, { Error as MongooseError } from 'mongoose';
 import usersRouter from '../routes/users';
 import cardsRouter from '../routes/cards';
 
@@ -19,9 +19,19 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
 
-app.use((err: Error & { statusCode: number }, req: Request, res: Response, next: NextFunction) => {
-  res.status(err.statusCode || 500).send({ message: err.message });
-  next();
-});
+app.use(
+  (
+    err: Error & { statusCode?: number },
+    req: Request,
+    res: Response,
+    _next: NextFunction,
+  ) => {
+    if (err instanceof MongooseError.ValidationError || err instanceof MongooseError.CastError) {
+      res.status(400).send({ message: err.message });
+      return;
+    }
+    res.status(err.statusCode || 500).send({ message: err.message });
+  },
+);
 
 app.listen(port);

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Schema } from 'mongoose';
+import { Types } from 'mongoose';
 import Card from '../models/card';
 import NotFoundError from '../errors/not-found-error';
 
@@ -10,7 +10,7 @@ export const getCards = (req: Request, res: Response, next: NextFunction) => Car
 export const createCard = (req: Request, res: Response, next: NextFunction) => {
   const { name, link } = req.body;
 
-  return Card.create({ name, link, owner: new Schema.Types.ObjectId(req.user._id) })
+  return Card.create({ name, link, owner: new Types.ObjectId(req.user._id) })
     .then((card) => res.status(201).send({ card }))
     .catch(next);
 };
@@ -33,7 +33,7 @@ export const likeCard = (req: Request, res: Response, next: NextFunction) => {
 
   return Card.findByIdAndUpdate(
     cardId,
-    { $addToSet: { likes: req.user._id } },
+    { $addToSet: { likes: new Types.ObjectId(req.user._id) } },
     { new: true },
   )
     .then((card) => {
@@ -50,7 +50,7 @@ export const dislikeCard = (req: Request, res: Response, next: NextFunction) => 
 
   return Card.findByIdAndUpdate(
     cardId,
-    { $pull: { likes: req.user._id } },
+    { $pull: { likes: new Types.ObjectId(req.user._id) } },
     { new: true },
   )
     .then((card) => {
