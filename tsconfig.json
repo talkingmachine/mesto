@@ -17,6 +17,9 @@
     /* Completeness */
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   },
+  "files": [
+    "src/types/express.d.ts" // а то type error'ы при req.user
+  ],
   "include": [
     "src/**/*.ts"
   ],
