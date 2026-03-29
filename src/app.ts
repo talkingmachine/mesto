@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cookieParser from 'cookie-parser';
-import { errors } from 'celebrate';
+import { celebrate, Joi, errors } from 'celebrate';
 import mongoose, { Error as MongooseError } from 'mongoose';
 import usersRouter from '../routes/users';
 import cardsRouter from '../routes/cards';
@@ -18,8 +18,21 @@ app.use(cookieParser());
 
 app.use(requestLogger);
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(8),
+  }),
+}), login);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().optional().min(2).max(30),
+    about: Joi.string().optional().min(2).max(200),
+    avatar: Joi.string().optional().uri(),
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(8),
+  }),
+}), createUser);
 
 app.use(auth);
 
