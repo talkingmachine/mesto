@@ -47,6 +47,7 @@ app.use(
     err: Error & { statusCode?: number },
     req: Request,
     res: Response,
+    // eslint-disable-next-line no-unused-vars
     next: NextFunction,
   ) => {
     if (err instanceof MongooseError.ValidationError || err instanceof MongooseError.CastError) {
@@ -54,8 +55,6 @@ app.use(
       return;
     }
     res.status(err.statusCode || 500).send({ message: err.message });
-
-    next();
   },
 );
 

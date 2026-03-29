@@ -11,11 +11,11 @@ export default (req: Request, res: Response, next: NextFunction) => {
   }
 
   try {
-    payload = jwt.verify(token, 'some-secret-key');
+    payload = jwt.verify(token, 'some-secret-key') as { _id: string };
   } catch (err) {
     return next(new UnauthorizedError('Необходима авторизация'));
   }
 
   req.user = payload;
-  next();
+  return next();
 };
