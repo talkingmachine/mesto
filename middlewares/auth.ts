@@ -7,13 +7,13 @@ export default (req: Request, res: Response, next: NextFunction) => {
   let payload;
 
   if (!token) {
-    throw new UnauthorizedError('Необходима авторизация');
+    next(new UnauthorizedError('Необходима авторизация'));
   }
 
   try {
     payload = jwt.verify(token, 'some-secret-key');
   } catch (err) {
-    throw new UnauthorizedError('Необходима авторизация');
+    next(new UnauthorizedError('Необходима авторизация'));
   }
 
   req.user = payload;

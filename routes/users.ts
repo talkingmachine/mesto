@@ -8,12 +8,12 @@ const router = Router();
 
 router.get('/', getUsers);
 router.get('/me', getMe);
-router.get('/:userId', getUser, celebrate({
+router.get('/:userId', celebrate({
   params: Joi.object().keys({
     userId: Joi.string().required().length(24),
   }),
-}));
-router.post('/', createUser, celebrate({
+}), getUser);
+router.post('/', celebrate({
   body: Joi.object().keys({
     name: Joi.string().optional().min(2).max(30),
     about: Joi.string().optional().min(2).max(200),
@@ -21,17 +21,17 @@ router.post('/', createUser, celebrate({
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
   }),
-}));
-router.patch('/me', updateSelf, celebrate({
+}), createUser);
+router.patch('/me', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
     about: Joi.string().required().min(2).max(200),
   }),
-}));
-router.patch('/me/avatar', updateSelfAvatar, celebrate({
+}), updateSelf);
+router.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
     avatar: Joi.string().required().uri(),
   }),
-}));
+}), updateSelfAvatar);
 
 export default router;

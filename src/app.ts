@@ -26,8 +26,8 @@ app.use(auth);
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
 
-app.use(errors()); // celebrate error handler
 app.use(errorLogger);
+app.use(errors()); // celebrate error handler
 
 app.use(
   (

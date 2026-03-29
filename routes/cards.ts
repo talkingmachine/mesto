@@ -7,26 +7,26 @@ import {
 const router = Router();
 
 router.get('/', getCards);
-router.post('/', createCard, celebrate({
+router.post('/', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
     link: Joi.string().required().uri(),
   }),
-}));
-router.delete('/:cardId', deleteCard, celebrate({
+}), createCard);
+router.delete('/:cardId', celebrate({
   params: Joi.object().keys({
     cardId: Joi.string().required().length(24),
   }),
-}));
-router.put('/:cardId/likes', likeCard, celebrate({
+}), deleteCard);
+router.put('/:cardId/likes', celebrate({
   params: Joi.object().keys({
     cardId: Joi.string().required().length(24),
   }),
-}));
-router.delete('/:cardId/likes', dislikeCard, celebrate({
+}), likeCard);
+router.delete('/:cardId/likes', celebrate({
   params: Joi.object().keys({
     cardId: Joi.string().required().length(24),
   }),
-}));
+}), dislikeCard);
 
 export default router;

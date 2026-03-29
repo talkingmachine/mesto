@@ -27,8 +27,10 @@ export const deleteCard = (req: Request, res: Response, next: NextFunction) => {
       if (card.owner.toString() !== req.user._id) {
         throw new ForbiddenError('У вас нет прав на удаление этой карточки');
       }
+
+      return Card.findByIdAndDelete(cardId);
     })
-    .then(() => Card.findByIdAndDelete(cardId).then((card) => res.send({ card })))
+    .then((card) => res.send({ card }))
     .catch(next);
 };
 

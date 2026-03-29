@@ -47,10 +47,15 @@ export const createUser = (req: Request, res: Response, next: NextFunction) => {
     avatar,
     email,
     password: hash,
-  })).then((user) => res.status(201).send({ user }))
+  })).then((user) => {
+    res.status(201).send({
+      ...user.toObject(),
+      password: '********',
+    });
+  })
     .catch((err) => {
       if (err.code === 11000) {
-        throw new ConflictError('Пользователь с таким email уже существует');
+        return next(new ConflictError('Пользователь с таким email уже существует'));
       }
       return next(err);
     });
@@ -95,21 +100,21 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
       if (!user) {
         throw new UnauthorizedError('Неправильный email или пароль');
       }
-      return { user, matched: bcrypt.compare(password, user.password) };
-    })
-    .then(({ user, matched }) => {
-      if (!matched) {
-        throw new UnauthorizedError('Неправильный email или пароль');
-      }
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key', {
-        expiresIn: '7d',
-      });
-      res.cookie('jwt', token, {
-        httpOnly: true,
-        maxAge: 3600000 * 24 * 7,
-        sameSite: 'strict',
-      });
-      res.send({ message: 'Авторизация успешна' });
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            throw new UnauthorizedError('Неправильный email или пароль');
+          }
+          const token = jwt.sign({ _id: user._id }, 'some-secret-key', {
+            expiresIn: '7d',
+          });
+          res.cookie('jwt', token, {
+            httpOnly: true,
+            maxAge: 3600000 * 24 * 7,
+            sameSite: 'strict',
+          });
+          res.send({ message: 'Авторизация успешна' });
+        });
     })
     .catch(next);
 };
