@@ -41,18 +41,18 @@ export const createUser = (req: Request, res: Response, next: NextFunction) => {
     name, about, avatar, email, password,
   } = req.body;
 
-  return User.create({
+  return bcrypt.hash(password, 10).then((hash) => User.create({
     name,
     about,
     avatar,
     email,
-    password: bcrypt.hash(password, 10),
-  })
-    .then((user) => res.status(201).send({ user }))
+    password: hash,
+  })).then((user) => res.status(201).send({ user }))
     .catch((err) => {
       if (err.code === 11000) {
         throw new ConflictError('Пользователь с таким email уже существует');
-      } else next(err);
+      }
+      return next(err);
     });
 };
 
@@ -92,7 +92,13 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
   return User.findOne({ email })
     .select('+password')
     .then((user) => {
-      if (!user || !bcrypt.compare(password, user.password)) {
+      if (!user) {
+        throw new UnauthorizedError('Неправильный email или пароль');
+      }
+      return { user, matched: bcrypt.compare(password, user.password) };
+    })
+    .then(({ user, matched }) => {
+      if (!matched) {
         throw new UnauthorizedError('Неправильный email или пароль');
       }
       const token = jwt.sign({ _id: user._id }, 'some-secret-key', {
